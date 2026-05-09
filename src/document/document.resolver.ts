@@ -1,7 +1,7 @@
 import { ResolveFn } from '@angular/router';
 import { delay, of } from 'rxjs';
 import type { IDocument } from './model';
-import { documentMock } from './document.mock';
+import { getDocumentMock } from './document.mock';
 
 
 export const documentResolver: ResolveFn<IDocument> = route => {
@@ -10,5 +10,5 @@ export const documentResolver: ResolveFn<IDocument> = route => {
   console.log('documentResolver: id =>', id);
 
   // -- mock api response in 1.2 sec delay --
-  return of(documentMock).pipe(delay(1200));
+  return of(getDocumentMock(id)).pipe(delay(1200));
 };

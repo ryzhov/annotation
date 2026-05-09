@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject, InjectionToken, Signal, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, InjectionToken, Signal, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { DocumentHeaderComponent } from './document-header.component';
 import { IDocument } from './model';
+import { DocumentViewerComponent } from './document-viewer.component';
 
 export const DOCUMENT = new InjectionToken<Signal<IDocument>>('DOCUMENT');
 
@@ -12,6 +13,7 @@ export const DOCUMENT = new InjectionToken<Signal<IDocument>>('DOCUMENT');
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     DocumentHeaderComponent,
+    DocumentViewerComponent,
   ],
   providers: [
     {
@@ -30,12 +32,22 @@ export const DOCUMENT = new InjectionToken<Signal<IDocument>>('DOCUMENT');
       (decrease)="scale.update(it => it - 10)"
       (save)="save()"
     />
+    <app-document-viewer
+      [pages]="document().pages"
+      [scale]="scale()"
+    />
   `
 })
 export class DocumentComponent {
-  protected readonly document = inject(DOCUMENT);
-  protected readonly scale = signal(100);
-  protected readonly name = signal('test doc');
+  readonly document = inject(DOCUMENT);
+  readonly scale = signal(100);
+  readonly name = signal('test doc');
+
+  constructor() {
+    effect(() => {
+      console.log('[DEBUG] document =>', this.document());
+    });
+  }
 
   save() {
     console.log('on save event =>');

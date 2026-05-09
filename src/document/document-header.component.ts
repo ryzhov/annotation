@@ -43,10 +43,11 @@ import { SCALE_LIMITS } from '../app.routes';
   `
 })
 export class DocumentHeaderComponent {
-  name = input.required<string>();
-  scale = input.required<number>();
-  increase = output<void>();
-  decrease = output<void>();
-  save = output<void>();
-  protected readonly limits = inject(SCALE_LIMITS);
+  readonly name = input.required<string>();
+  readonly scale = input.required<number>();
+  readonly increase = output<void>();
+  readonly decrease = output<void>();
+  readonly save = output<void>();
+
+  readonly limits = inject(SCALE_LIMITS);
 }

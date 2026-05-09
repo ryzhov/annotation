@@ -1,7 +1,7 @@
 import { IDocument } from './model';
 
-export const documentMock: IDocument = {
-  name: 'test doc 1',
+export const getDocumentMock = (id: number): IDocument => ({
+  name: `test doc ${id}`,
   pages: [
     {
       number: 1,
@@ -24,4 +24,4 @@ export const documentMock: IDocument = {
       imageUrl: 'pages/5.png'
     }
   ]
-};
+});
