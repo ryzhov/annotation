@@ -1,8 +1,12 @@
 import { Component, effect, input } from '@angular/core';
 import { IPage } from './model';
+import { DocumentPageComponent } from './document-page.component';
 
 @Component({
   selector: 'app-document-viewer',
+  imports: [
+    DocumentPageComponent
+  ],
   template: `
     <section
       class="overflow-y-auto flex flex-col items-center py-4"
@@ -10,17 +14,7 @@ import { IPage } from './model';
       [style.transformOrigin]="'top center'"
     >
       @for (page of pages(); track page.number) {
-        <div
-          class="relative mb-4 border border-gray-300 cursor-crosshair"
-          (click)="onPageClick(page.number, $event)"
-          [attr.aria-label]="'Add annotation to page ' + page.number"
-        >
-          <img
-            [src]="page.imageUrl"
-            class="block w-200 h-auto pointer-events-none select-none"
-            loading="lazy"
-          />
-        </div>
+        <app-document-page [number]="page.number" [url]="page.imageUrl" />
       }
     </section>
   `
@@ -35,13 +29,5 @@ export class DocumentViewerComponent {
     });
   }
 
-  onPageClick(pageNum: number, event: MouseEvent) {
-    const pageEl = event.currentTarget as HTMLElement;
-    const rect = pageEl.getBoundingClientRect();
 
-    const x = ((event.clientX - rect.left) / rect.width) * 100;
-    const y = ((event.clientY - rect.top) / rect.height) * 100;
-
-    console.log({ x, y, pageNum });
-  }
 }
