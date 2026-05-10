@@ -65,19 +65,19 @@ export class DocumentComponent {
   }
 
   onAddAnnotation(event: IAnnotation) {
-    console.log('DocumentViewer::addAnnotation =>', event);
+    console.log('Document::addAnnotation =>', event);
     this.annotations.update(annotations => [...annotations, event]);
   }
 
   onUpdateAnnotation(event: IAnnotationChanges) {
-    console.log('DocumentViewer::updateAnnotation =>', event);
+    console.log('Document::updateAnnotation =>', event);
     this.annotations.update(annotations => annotations.map(item =>
       item.id === event.id ? { ...item, ...event } : item
     ));
   }
 
   onDeleteAnnotation(event: string) {
-    console.log('DocumentViewer::deleteAnnotation =>', event);
+    console.log('Document::deleteAnnotation =>', event);
     this.annotations.update(annotations => annotations.filter(({ id }) => id !== event));
   }
 }

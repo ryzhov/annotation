@@ -1,12 +1,21 @@
-import { ChangeDetectionStrategy, Component, effect, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, InjectionToken, input, output } from '@angular/core';
 import { IAnnotation, IAnnotationChanges } from './model';
 import { DocumentAnnotationComponent } from './document-annotation.component';
+
+export const PAGE_ELEMENT = new InjectionToken<HTMLElement>('PAGE_ELEMENT');
 
 @Component({
   selector: 'app-document-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     DocumentAnnotationComponent
+  ],
+  viewProviders: [
+    {
+      provide: PAGE_ELEMENT,
+      deps: [ElementRef],
+      useFactory: (el: ElementRef<HTMLElement>): HTMLElement => el.nativeElement,
+    }
   ],
   template: `
     <div
@@ -43,12 +52,6 @@ export class DocumentPageComponent {
   readonly addAnnotation = output<IAnnotation>();
   readonly updateAnnotation = output<IAnnotationChanges>();
   readonly deleteAnnotation = output<string>();
-
-  constructor() {
-    effect(() => {
-      console.log(`page_${this.number()}::effect annotations =>`, this.annotations());
-    });
-  }
 
   onPageClick(pageNum: number, event: MouseEvent) {
     const pageEl = event.currentTarget as HTMLElement;
