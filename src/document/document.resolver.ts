@@ -9,6 +9,6 @@ export const documentResolver: ResolveFn<IDocument> = route => {
   const id = Number(route.paramMap.get('id'));
   console.log('documentResolver: id =>', id);
 
-  // -- mock api response in 1.2 sec delay --
-  return of(getDocumentMock(id)).pipe(delay(1200));
+  // -- mock api response in 0.3 sec delay --
+  return of(getDocumentMock(id)).pipe(delay(300));
 };

@@ -1,9 +1,10 @@
-import { Component, effect, input } from '@angular/core';
-import { IPage } from './model';
+import { ChangeDetectionStrategy, Component, computed, effect, input, signal } from '@angular/core';
+import { IAnnotation, IAnnotationChanges, IPage } from './model';
 import { DocumentPageComponent } from './document-page.component';
 
 @Component({
   selector: 'app-document-viewer',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     DocumentPageComponent
   ],
@@ -14,7 +15,14 @@ import { DocumentPageComponent } from './document-page.component';
       [style.transformOrigin]="'top center'"
     >
       @for (page of pages(); track page.number) {
-        <app-document-page [number]="page.number" [url]="page.imageUrl" />
+        <app-document-page
+          [number]="page.number"
+          [url]="page.imageUrl"
+          [annotations]="annotations()"
+          (addAnnotation)="onAddAnnotation($event)"
+          (updateAnnotation)="onUpdateAnnotation($event)"
+          (deleteAnnotation)="onDeleteAnnotation($event)"
+        />
       }
     </section>
   `
@@ -22,6 +30,7 @@ import { DocumentPageComponent } from './document-page.component';
 export class DocumentViewerComponent {
   readonly pages = input.required<IPage[]>();
   readonly scale = input.required<number>();
+  readonly annotations = signal<IAnnotation[]>([]);
 
   constructor() {
     effect(() => {
@@ -29,5 +38,20 @@ export class DocumentViewerComponent {
     });
   }
 
+  onAddAnnotation(event: IAnnotation) {
+    console.log('DocumentViewer::addAnnotation =>', event);
+    this.annotations.update(annotations => [...annotations, event]);
+  }
 
+  onUpdateAnnotation(event: IAnnotationChanges) {
+    console.log('DocumentViewer::updateAnnotation =>', event);
+    this.annotations.update(annotations => annotations.map(item =>
+      item.id === event.id ? { ...item, ...event } : item
+    ));
+  }
+
+  onDeleteAnnotation(event: string) {
+    console.log('DocumentViewer::deleteAnnotation =>', event);
+    this.annotations.update(annotations => annotations.filter(({ id }) => id !== event));
+  }
 }
