@@ -3,8 +3,9 @@ import { ActivatedRoute } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { DocumentHeaderComponent } from './document-header.component';
-import { IDocument } from './model';
+import { IAnnotation, IAnnotationChanges, IDocument } from './model';
 import { DocumentViewerComponent } from './document-viewer.component';
+import { DocumentPageComponent } from './document-page.component';
 
 export const DOCUMENT = new InjectionToken<Signal<IDocument>>('DOCUMENT');
 
@@ -14,6 +15,7 @@ export const DOCUMENT = new InjectionToken<Signal<IDocument>>('DOCUMENT');
   imports: [
     DocumentHeaderComponent,
     DocumentViewerComponent,
+    DocumentPageComponent,
   ],
   providers: [
     {
@@ -32,16 +34,25 @@ export const DOCUMENT = new InjectionToken<Signal<IDocument>>('DOCUMENT');
       (decrease)="scale.update(it => it - 10)"
       (save)="save()"
     />
-    <app-document-viewer
-      [pages]="document().pages"
-      [scale]="scale()"
-    />
+
+    <app-document-viewer [scale]="scale()">
+      @for (page of document().pages; track page.number) {
+        <app-document-page
+          [number]="page.number"
+          [url]="page.imageUrl"
+          [annotations]="annotations()"
+          (addAnnotation)="onAddAnnotation($event)"
+          (updateAnnotation)="onUpdateAnnotation($event)"
+          (deleteAnnotation)="onDeleteAnnotation($event)"
+        />
+      }
+    </app-document-viewer>
   `
 })
 export class DocumentComponent {
   readonly document = inject(DOCUMENT);
   readonly scale = signal(100);
-  readonly name = signal('test doc');
+  readonly annotations = signal<IAnnotation[]>([]);
 
   constructor() {
     effect(() => {
@@ -50,6 +61,23 @@ export class DocumentComponent {
   }
 
   save() {
-    console.log('on save event =>');
+    console.log('save document =>', { ...this.document(), annotations: this.annotations() });
+  }
+
+  onAddAnnotation(event: IAnnotation) {
+    console.log('DocumentViewer::addAnnotation =>', event);
+    this.annotations.update(annotations => [...annotations, event]);
+  }
+
+  onUpdateAnnotation(event: IAnnotationChanges) {
+    console.log('DocumentViewer::updateAnnotation =>', event);
+    this.annotations.update(annotations => annotations.map(item =>
+      item.id === event.id ? { ...item, ...event } : item
+    ));
+  }
+
+  onDeleteAnnotation(event: string) {
+    console.log('DocumentViewer::deleteAnnotation =>', event);
+    this.annotations.update(annotations => annotations.filter(({ id }) => id !== event));
   }
 }
