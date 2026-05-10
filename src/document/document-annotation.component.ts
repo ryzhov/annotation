@@ -49,6 +49,7 @@ export class DocumentAnnotationComponent {
   readonly textControl = new FormControl('');
   private readonly pageElement = inject(PAGE_ELEMENT);
   private readonly hostEl = inject(ElementRef<HTMLElement>).nativeElement;
+  private pageRect!: DOMRect;
   private dragging = false;
   private lastX = 0;
   private lastY = 0;
@@ -78,6 +79,7 @@ export class DocumentAnnotationComponent {
       return;
     }
 
+    this.pageRect = this.pageElement.getBoundingClientRect();
     this.hostEl.setPointerCapture(event.pointerId);
     this.dragging = true;
 
@@ -91,9 +93,8 @@ export class DocumentAnnotationComponent {
     }
 
     event.stopPropagation();
-    const pageRect = this.pageElement.getBoundingClientRect();
-    const x = this._normalizeValue(((event.clientX - pageRect.left) / pageRect.width) * 100);
-    const y = this._normalizeValue(((event.clientY - pageRect.top) / pageRect.height) * 100);
+    const x = this._normalizeValue(((event.clientX - this.pageRect.left) / this.pageRect.width) * 100);
+    const y = this._normalizeValue(((event.clientY - this.pageRect.top) / this.pageRect.height) * 100);
 
     if (x === this.lastX && y === this.lastY) {
       return;
@@ -102,7 +103,7 @@ export class DocumentAnnotationComponent {
     this.lastX = x;
     this.lastY = y;
 
-    console.log('dragging===true onPointerMove::event =>', { event, x, y, pageRect });
+    console.log('dragging===true onPointerMove::event =>', { event, x, y, pageRect: this.pageRect });
     this.update.emit({ id: this.annotation().id, x, y });
   }
 
