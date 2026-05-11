@@ -53,6 +53,8 @@ export class DocumentAnnotationComponent {
   private dragging = false;
   private lastX = 0;
   private lastY = 0;
+  private offsetX = 0;
+  private offsetY = 0;
 
   constructor() {
     this.textControl.valueChanges.subscribe(val => {
@@ -82,9 +84,11 @@ export class DocumentAnnotationComponent {
     this.pageRect = this.pageElement.getBoundingClientRect();
     this.hostEl.setPointerCapture(event.pointerId);
     this.dragging = true;
+    this.lastX = this._normalizeValue(((event.clientX - this.pageRect.left) / this.pageRect.width) * 100);
+    this.lastY = this._normalizeValue(((event.clientY - this.pageRect.top) / this.pageRect.height) * 100);
 
-    this.lastX = this.annotation().x;
-    this.lastY = this.annotation().y;
+    this.offsetX = this.lastX - this.annotation().x;
+    this.offsetY = this.lastY - this.annotation().y;
   }
 
   onPointerMove(event: PointerEvent) {
@@ -93,8 +97,8 @@ export class DocumentAnnotationComponent {
     }
 
     event.stopPropagation();
-    const x = this._normalizeValue(((event.clientX - this.pageRect.left) / this.pageRect.width) * 100);
-    const y = this._normalizeValue(((event.clientY - this.pageRect.top) / this.pageRect.height) * 100);
+    const x = this._normalizeValue(((event.clientX - this.pageRect.left) / this.pageRect.width) * 100 - this.offsetX);
+    const y = this._normalizeValue(((event.clientY - this.pageRect.top) / this.pageRect.height) * 100 - this.offsetY);
 
     if (x === this.lastX && y === this.lastY) {
       return;
