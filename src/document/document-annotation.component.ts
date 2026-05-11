@@ -1,4 +1,13 @@
-import { Component, input, output, effect, ChangeDetectionStrategy, ElementRef, inject } from '@angular/core';
+import {
+  Component,
+  input,
+  output,
+  effect,
+  ChangeDetectionStrategy,
+  ElementRef,
+  inject,
+  DestroyRef
+} from '@angular/core';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { IAnnotation, IAnnotationChanges } from './model';
 import { PAGE_ELEMENT } from './document-page.component';
@@ -51,12 +60,13 @@ export class DocumentAnnotationComponent {
   private readonly hostEl = inject(ElementRef<HTMLElement>).nativeElement;
   private pageRect!: DOMRect;
   private dragging = false;
+  private pointerId = -1;
   private lastX = 0;
   private lastY = 0;
   private offsetX = 0;
   private offsetY = 0;
 
-  constructor() {
+  constructor(private readonly destroyRef: DestroyRef) {
     this.textControl.valueChanges.subscribe(val => {
       console.log('annotation::textControl val =>', val);
       this.update.emit({ id: this.annotation().id, text: val ?? '' });
@@ -67,6 +77,13 @@ export class DocumentAnnotationComponent {
         this.textControl.setValue(this.annotation().text, { emitEvent: false });
       }
     });
+
+    this.destroyRef.onDestroy(() => {
+      console.log('annotation::onDestroy =>');
+      if (this.pointerId !== -1 && this.hostEl.hasPointerCapture(this.pointerId)) {
+        this.hostEl.releasePointerCapture(this.pointerId);
+      }
+    })
   }
 
   private _normalizeValue(value: number) {
@@ -82,6 +99,8 @@ export class DocumentAnnotationComponent {
     }
 
     this.pageRect = this.pageElement.getBoundingClientRect();
+    // -- save pointerId for release capture on abnormal destroy
+    this.pointerId = event.pointerId;
     this.hostEl.setPointerCapture(event.pointerId);
     this.dragging = true;
     this.lastX = this._normalizeValue(((event.clientX - this.pageRect.left) / this.pageRect.width) * 100);
