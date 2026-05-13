@@ -6,6 +6,7 @@ import { DocumentHeaderComponent } from './document-header.component';
 import { IAnnotation, IAnnotationChanges, IDocument } from './model';
 import { DocumentViewerComponent } from './document-viewer.component';
 import { DocumentPageComponent } from './document-page.component';
+import { DocumentAnnotationComponent } from './document-annotation.component';
 
 export const DOCUMENT = new InjectionToken<Signal<IDocument>>('DOCUMENT');
 
@@ -16,6 +17,7 @@ export const DOCUMENT = new InjectionToken<Signal<IDocument>>('DOCUMENT');
     DocumentHeaderComponent,
     DocumentViewerComponent,
     DocumentPageComponent,
+    DocumentAnnotationComponent,
   ],
   providers: [
     {
@@ -40,11 +42,20 @@ export const DOCUMENT = new InjectionToken<Signal<IDocument>>('DOCUMENT');
         <app-document-page
           [number]="page.number"
           [url]="page.imageUrl"
-          [annotations]="annotations()"
           (addAnnotation)="onAddAnnotation($event)"
-          (updateAnnotation)="onUpdateAnnotation($event)"
-          (deleteAnnotation)="onDeleteAnnotation($event)"
-        />
+        >
+          @for (ann of annotations(); track ann.id) {
+            @if (ann.page === page.number) {
+              <app-document-annotation
+                [annotation]="ann"
+                [style.left.%]="ann.x"
+                [style.top.%]="ann.y"
+                (update)="onUpdateAnnotation($event)"
+                (delete)="onDeleteAnnotation($event)"
+              />
+            }
+          }
+        </app-document-page>
       }
     </app-document-viewer>
   `
