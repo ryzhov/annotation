@@ -2,19 +2,17 @@ import {
   Component,
   input,
   output,
-  effect,
   ChangeDetectionStrategy,
   ElementRef,
   inject,
-  DestroyRef
+  DestroyRef,
+  computed
 } from '@angular/core';
-import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { IAnnotation, IAnnotationChanges } from './model';
 import { PAGE_ELEMENT } from './document-page.component';
 
 @Component({
   selector: 'app-document-annotation',
-  imports: [ReactiveFormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'absolute cursor-move p-1 bg-yellow-100/70 border border-yellow-400 rounded shadow-md min-w-[140px] transition-shadow hover:shadow-lg',
@@ -35,7 +33,8 @@ import { PAGE_ELEMENT } from './document-page.component';
       </div>
       <input
         type="text"
-        [formControl]="textControl"
+        [value]="text()"
+        (input)="onInput($event)"
         class="w-full bg-transparent text-sm outline-none placeholder-gray-600 focus:ring-2 focus:ring-yellow-400 rounded px-1 py-0.5"
         placeholder="Add note..."
         aria-label="Annotation text input"
@@ -55,7 +54,7 @@ export class DocumentAnnotationComponent {
   readonly update = output<IAnnotationChanges>();
   readonly delete = output<string>();
 
-  readonly textControl = new FormControl('');
+  readonly text = computed(() => this.annotation().text);
   private readonly pageElement = inject(PAGE_ELEMENT);
   private readonly hostEl = inject(ElementRef<HTMLElement>).nativeElement;
   private pageRect!: DOMRect;
@@ -67,25 +66,17 @@ export class DocumentAnnotationComponent {
   private offsetY = 0;
 
   constructor(private readonly destroyRef: DestroyRef) {
-    this.textControl.valueChanges.subscribe(val => {
-      console.log('DocumentAnnotation::textControl val =>', val);
-      this.update.emit({ id: this.annotation().id, text: val ?? '' });
-    });
-
-    effect(() => {
-      console.log('DocumentAnnotation::effect text =>', this.annotation().text);
-
-      if (this.textControl.value !== this.annotation().text) {
-        this.textControl.setValue(this.annotation().text, { emitEvent: false });
-      }
-    });
-
     this.destroyRef.onDestroy(() => {
       console.log('annotation::onDestroy =>');
       if (this.pointerId !== -1 && this.hostEl.hasPointerCapture(this.pointerId)) {
         this.hostEl.releasePointerCapture(this.pointerId);
       }
     })
+  }
+
+  onInput(event: Event) {
+    const value = (event.target as HTMLInputElement).value;
+    this.update.emit({ id: this.annotation().id, text: value ?? '' });
   }
 
   private _normalizeValue(value: number) {
