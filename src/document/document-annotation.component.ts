@@ -68,11 +68,13 @@ export class DocumentAnnotationComponent {
 
   constructor(private readonly destroyRef: DestroyRef) {
     this.textControl.valueChanges.subscribe(val => {
-      console.log('annotation::textControl val =>', val);
+      console.log('DocumentAnnotation::textControl val =>', val);
       this.update.emit({ id: this.annotation().id, text: val ?? '' });
     });
 
     effect(() => {
+      console.log('DocumentAnnotation::effect text =>', this.annotation().text);
+
       if (this.textControl.value !== this.annotation().text) {
         this.textControl.setValue(this.annotation().text, { emitEvent: false });
       }
