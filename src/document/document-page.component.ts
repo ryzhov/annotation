@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, ElementRef, InjectionToken, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, InjectionToken, input, output } from '@angular/core';
 import { IAnnotation } from './model';
+import { EventPointService } from './event-point.service';
 
 export const PAGE_ELEMENT = new InjectionToken<HTMLElement>('PAGE_ELEMENT');
 
@@ -34,13 +35,13 @@ export class DocumentPageComponent {
   readonly number = input.required<number>();
   readonly url = input.required<string>();
   readonly addAnnotation = output<IAnnotation>();
+  private readonly eventPoint = inject(EventPointService);
 
   onPageClick(pageNum: number, event: MouseEvent) {
     const pageEl = event.currentTarget as HTMLElement;
     const rect = pageEl.getBoundingClientRect();
 
-    const x = ((event.clientX - rect.left) / rect.width) * 100;
-    const y = ((event.clientY - rect.top) / rect.height) * 100;
+    const [x, y] = this.eventPoint.calc(event, rect);
 
     const annotation: IAnnotation = {
       id: crypto.randomUUID(),

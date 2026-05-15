@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { IAnnotation, IAnnotationChanges } from './model';
 import { PAGE_ELEMENT } from './document-page.component';
+import { EventPointService } from './event-point.service';
 
 @Component({
   selector: 'app-document-annotation',
@@ -56,6 +57,7 @@ export class DocumentAnnotationComponent {
 
   readonly text = computed(() => this.annotation().text);
   private readonly pageElement = inject(PAGE_ELEMENT);
+  private readonly eventPoint = inject(EventPointService);
   private readonly hostEl = inject(ElementRef<HTMLElement>).nativeElement;
   private pageRect!: DOMRect;
   private dragging = false;
@@ -78,9 +80,6 @@ export class DocumentAnnotationComponent {
     this.update.emit({ id: this.annotation().id, text: value ?? '' });
   }
 
-  private _normalizeValue(value: number) {
-    return Math.max(0, Math.min(100, value));
-  }
 
   onPointerDown(event: PointerEvent) {
     event.stopPropagation();
@@ -93,8 +92,7 @@ export class DocumentAnnotationComponent {
     this.pointerId = event.pointerId;
     this.hostEl.setPointerCapture(event.pointerId);
     this.dragging = true;
-    this.lastX = this._normalizeValue(((event.clientX - this.pageRect.left) / this.pageRect.width) * 100);
-    this.lastY = this._normalizeValue(((event.clientY - this.pageRect.top) / this.pageRect.height) * 100);
+    [this.lastX, this.lastY] = this.eventPoint.calc(event, this.pageRect);
 
     this.offsetX = this.lastX - this.annotation().x;
     this.offsetY = this.lastY - this.annotation().y;
@@ -106,8 +104,7 @@ export class DocumentAnnotationComponent {
     }
 
     event.stopPropagation();
-    const x = this._normalizeValue(((event.clientX - this.pageRect.left) / this.pageRect.width) * 100 - this.offsetX);
-    const y = this._normalizeValue(((event.clientY - this.pageRect.top) / this.pageRect.height) * 100 - this.offsetY);
+    const [x, y] = this.eventPoint.calc(event, this.pageRect, [this.offsetX, this.offsetY]);
 
     if (x === this.lastX && y === this.lastY) {
       return;
