@@ -3,9 +3,7 @@ import { Injectable } from '@angular/core';
 export type EventPoint = [x: number, y: number];
 
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class EventPointService {
 
   private _normalizeValue(value: number) {
