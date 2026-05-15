@@ -67,7 +67,6 @@ export class DocumentAnnotationComponent {
 
   constructor(private readonly destroyRef: DestroyRef) {
     this.destroyRef.onDestroy(() => {
-      console.log('annotation::onDestroy =>');
       if (this.pointerId !== -1 && this.hostEl.hasPointerCapture(this.pointerId)) {
         this.hostEl.releasePointerCapture(this.pointerId);
       }
@@ -84,8 +83,6 @@ export class DocumentAnnotationComponent {
   }
 
   onPointerDown(event: PointerEvent) {
-    console.log('onPointerDown::event =>', event);
-
     event.stopPropagation();
     if ((event.target as HTMLElement).matches('input, button')) {
       return;
@@ -119,7 +116,6 @@ export class DocumentAnnotationComponent {
     this.lastX = x;
     this.lastY = y;
 
-    console.log('dragging===true onPointerMove::event =>', { event, x, y, pageRect: this.pageRect });
     this.update.emit({ id: this.annotation().id, x, y });
   }
 
@@ -129,8 +125,6 @@ export class DocumentAnnotationComponent {
     }
 
     event.stopPropagation();
-    console.log('dragging===true onPointerUp::event =>', event);
-
     this.dragging = false;
 
     if (this.hostEl.hasPointerCapture(event.pointerId)) {

@@ -50,8 +50,6 @@ export class DocumentPageComponent {
       text: ''
     };
 
-    console.log('onPageClick::annotation =>', annotation);
-
     this.addAnnotation.emit(annotation);
   }
 }

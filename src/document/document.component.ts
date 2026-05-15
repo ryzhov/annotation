@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, inject, InjectionToken, Signal, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, InjectionToken, Signal, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
@@ -65,30 +65,21 @@ export class DocumentComponent {
   readonly scale = signal(100);
   readonly annotations = signal<IAnnotation[]>([]);
 
-  constructor() {
-    effect(() => {
-      console.log('[DEBUG] document =>', this.document());
-    });
-  }
-
   save() {
     console.log('save document =>', { ...this.document(), annotations: this.annotations() });
   }
 
   onAddAnnotation(event: IAnnotation) {
-    console.log('Document::addAnnotation =>', event);
     this.annotations.update(annotations => [...annotations, event]);
   }
 
   onUpdateAnnotation(event: IAnnotationChanges) {
-    console.log('Document::updateAnnotation =>', event);
     this.annotations.update(annotations => annotations.map(item =>
       item.id === event.id ? { ...item, ...event } : item
     ));
   }
 
   onDeleteAnnotation(event: string) {
-    console.log('Document::deleteAnnotation =>', event);
     this.annotations.update(annotations => annotations.filter(({ id }) => id !== event));
   }
 }
